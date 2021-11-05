@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.sohu.tv.mq.cloud.util.MarkdownBuilder;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.rocketmq.common.protocol.body.KVTable;
 import org.apache.rocketmq.tools.admin.MQAdminExt;
@@ -218,6 +219,8 @@ public class ClusterMonitorTask {
         }
         // 是否报警
         boolean flag = false;
+        MarkdownBuilder markdownBuilder = new MarkdownBuilder();
+        markdownBuilder.title2("MQCloud " + alarmTitle + "预警").line();
         StringBuilder smsBuilder = new StringBuilder();
         StringBuilder content = new StringBuilder("<table border=1>");
         content.append("<thead>");
@@ -241,16 +244,19 @@ public class ClusterMonitorTask {
             content.append("<tr>");
             content.append("<td rowspan=" + alarmList.size() + ">");
             content.append("<a href='");
+            String link;
             if (type == 0) {//ns
-                content.append(mqCloudConfigHelper.getNameServerMonitorLink(cluster.getId()));
+                link = mqCloudConfigHelper.getNameServerMonitorLink(cluster.getId());
             } else { //broker
-                content.append(mqCloudConfigHelper.getBrokerMonitorLink(cluster.getId())); 
+                link = mqCloudConfigHelper.getBrokerMonitorLink(cluster.getId());
             }
+            content.append(link);
             smsBuilder.append("cluster:");
             smsBuilder.append(cluster.getName());
             smsBuilder.append(":");
             content.append("'>" + cluster.getName() + "</a>");
             content.append("</td>");
+            markdownBuilder.title3("集群").link(cluster.getName(), link);
             for (int i = 0; i < alarmList.size(); i++) {
                 if (i > 0) {
                     content.append("<tr>");
@@ -262,15 +268,18 @@ public class ClusterMonitorTask {
                 if (i > 0) {
                     content.append("</tr>");
                 }
+                markdownBuilder.title3("异常信息").unorderedList(alarmList);
             }
             smsBuilder.append(";");
             content.append("</tr>");
+            markdownBuilder.line();
         }
         content.append("</tbody>");
         content.append("</table>");
         if (flag) {
             sendAlertMessage(alarmTitle, content.toString());
             alertService.sendPhone(alarmTitle, smsBuilder.toString());
+            alertService.sendWarnDingTalk(alarmTitle, markdownBuilder.build());
         }
     }
     

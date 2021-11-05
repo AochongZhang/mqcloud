@@ -154,6 +154,12 @@ public class MQCloudConfigHelper implements ApplicationEventPublisherAware, Comm
     // 消费失败统计支持版本
     private String consumeFailedMetricSupportedVersion;
 
+    // 钉钉机器人相关
+    // 钉钉机器人地址
+    private String dingTalkRobotUrl;
+    // 钉钉机器人密钥
+    private String dingTalkRobotSecret;
+
     @Autowired
     private CommonConfigService commonConfigService;
 
@@ -546,6 +552,22 @@ public class MQCloudConfigHelper implements ApplicationEventPublisherAware, Comm
 
     public boolean consumeFailedMetricSupported(String version) {
         return version.compareTo(consumeFailedMetricSupportedVersion) >= 0;
+    }
+
+    public String getDingTalkRobotUrl() {
+        return dingTalkRobotUrl;
+    }
+
+    public void setDingTalkRobotUrl(String dingTalkRobotUrl) {
+        this.dingTalkRobotUrl = dingTalkRobotUrl;
+    }
+
+    public String getDingTalkRobotSecret() {
+        return dingTalkRobotSecret;
+    }
+
+    public void setDingTalkRobotSecret(String dingTalkRobotSecret) {
+        this.dingTalkRobotSecret = dingTalkRobotSecret;
     }
     
     public String getMachineRoomColor(String room) {

@@ -3,6 +3,7 @@ package com.sohu.tv.mq.cloud.service;
 import java.util.Arrays;
 import java.util.List;
 
+import com.sohu.tv.mq.cloud.util.DingTalkRobotUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -164,7 +165,28 @@ public class AlertService {
             return mailSender.send(title, content, email, getDevelopers(), 10000);
         }
     }
-    
+
+    /**
+     * 发送钉钉机器人报警信息
+     *
+     * @param flag
+     * @param content
+     * @return
+     */
+    public boolean sendWarnDingTalk(String flag, String content) {
+        String url = mqCloudConfigHelper.getDingTalkRobotUrl();
+        if (url == null || url.equals("")) {
+            return false;
+        }
+        String secret = mqCloudConfigHelper.getDingTalkRobotSecret();
+        if (secret != null && !secret.equals("")) {
+            url = DingTalkRobotUtils.buildSignUrl(url, secret);
+        }
+        String title = "MQCloud " + flag + "预警";
+        DingTalkRobotUtils.sendMarkdown(url, title, content).check();
+        return true;
+    }
+
     public String getDevelopers() {
         String email = userService.queryMonitorEmail();
         if(email == null) {
