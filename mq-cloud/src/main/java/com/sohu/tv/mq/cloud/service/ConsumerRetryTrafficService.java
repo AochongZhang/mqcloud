@@ -1,5 +1,6 @@
 package com.sohu.tv.mq.cloud.service;
 
+import com.sohu.tv.mq.cloud.util.MarkdownBuilder;
 import org.apache.rocketmq.store.stats.BrokerStatsManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -39,6 +40,15 @@ public class ConsumerRetryTrafficService extends HourTrafficService{
                         + ", <a href='" + mqCloudConfigHelper.getTopicConsumeHref(topicConsumer.getTid(),
                                 topicConsumer.getConsumer(), topicConsumer.getCid(), 0)
                         + "'>跳过重试消息</a>?");
+                MarkdownBuilder markdownBuilder = new MarkdownBuilder();
+                markdownBuilder.title2("MQCloud 消费失败预警").line();
+                markdownBuilder.title3("Topic").text(topicConsumer.getTopic()).doReturn();
+                markdownBuilder.title3("消费者").link(topicConsumer.getConsumer(), mqCloudConfigHelper
+                        .getTopicConsumeHref(topicConsumer.getTid(), topicConsumer.getConsumer(), -1, System.currentTimeMillis()));
+                markdownBuilder.title3("消费失败量").text(String.valueOf(topicTraffic.getCount())).doReturn();
+                markdownBuilder.link("跳过重试消息", mqCloudConfigHelper.getTopicConsumeHref(topicConsumer.getTid(),
+                        topicConsumer.getConsumer(), topicConsumer.getCid(), 0));
+                alertService.sendWarnDingTalk("消费失败", markdownBuilder.build());
             }
         }
     }
